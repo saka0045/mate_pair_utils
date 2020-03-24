@@ -19,6 +19,7 @@ DOCS
 ##################################################
 
 INPUT_DIR=""
+ORIGINAL_FASTQ_DIR=""
 L001_R1=""
 L001_R2=""
 L002_R1=""
@@ -49,6 +50,23 @@ fi
 # Remove any trailing "/" from INPUT_DIR
 INPUT_DIR=${INPUT_DIR%/}
 
+# Check to see if original_fastqs directory exists
+# If it doesn't, create the directory and copy all the original fastqs
+# If it does, exit the script
+ORIGINAL_FASTQ_DIR=${INPUT_DIR}/original_fastqs
+
+if [[ ! -d ${ORIGINAL_FASTQ_DIR} ]]; then
+    echo "Creating ${ORIGINAL_FASTQ_DIR}"
+    mkdir ${ORIGINAL_FASTQ_DIR}
+else
+    echo "${ORIGINAL_FASTQ_DIR} already exists. Aborting"
+    exit 1
+fi
+
+# Copy the original fastq files
+echo "Copying the original fastq files"
+/bin/cp ${INPUT_DIR}/*.fastq.gz ${ORIGINAL_FASTQ_DIR}
+
 # Define the different fastq files
 L001_R1=${INPUT_DIR}/*L001*R1*.fastq.gz
 L001_R2=${INPUT_DIR}/*L001*R2*.fastq.gz
@@ -59,4 +77,20 @@ L003_R2=${INPUT_DIR}/*L003*R2*.fastq.gz
 L004_R1=${INPUT_DIR}/*L004*R1*.fastq.gz
 L004_R2=${INPUT_DIR}/*L004*R2*.fastq.gz
 
+# Concatenate the L003 at the end of L001 fastq files
 echo "Concatenating" ${L001_R1} "and" ${L003_R1}
+/bin/cat ${L003_R1} >> ${L001_R1}
+echo "Concatenating" ${L001_R2} "and" ${L003_R2}
+/bin/cat ${L003_R2} >> ${L001_R2}
+
+# Concatenate the L004 at the end of L002 fastq files
+echo "Concatenating" ${L002_R1} "and" ${L004_R1}
+/bin/cat ${L004_R1} >> ${L002_R1}
+echo "Concatenating" ${L002_R2} "and" ${L004_R2}
+/bin/cat ${L004_R2} >> ${L002_R2}
+
+# Remove the L003 and L004 fastq files
+echo "Removing" ${L003_R1} "and" ${L003_R2}
+/bin/rm ${L003_R1} ${L003_R2}
+echo "Removing" ${L004_R1} "and" ${L004_R2}
+/bin/rm ${L004_R1} ${L004_R2}
