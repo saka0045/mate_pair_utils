@@ -77,6 +77,11 @@ L003_R2=${INPUT_DIR}/*L003*R2*.fastq.gz
 L004_R1=${INPUT_DIR}/*L004*R1*.fastq.gz
 L004_R2=${INPUT_DIR}/*L004*R2*.fastq.gz
 
+# Get the unique identifier for the sample from the fastq file name
+BASE_NAME=$(basename -- ${L001_R1})
+UNIQUE_IDENTIFIER=$(cut -d "_" -f 1-2 <<< ${BASE_NAME})
+echo "Unique identifier is: ${UNIQUE_IDENTIFIER}"
+
 # Concatenate the L003 at the end of L001 fastq files
 echo "Concatenating" ${L001_R1} "and" ${L003_R1}
 /bin/cat ${L003_R1} >> ${L001_R1}
@@ -94,3 +99,11 @@ echo "Removing" ${L003_R1} "and" ${L003_R2}
 /bin/rm ${L003_R1} ${L003_R2}
 echo "Removing" ${L004_R1} "and" ${L004_R2}
 /bin/rm ${L004_R1} ${L004_R2}
+
+# Make the L012 fastq files
+L012_R1="${INPUT_DIR}/${UNIQUE_IDENTIFIER}_L012_R1_001.fastq.gz"
+L012_R2="${INPUT_DIR}/${UNIQUE_IDENTIFIER}_L012_R2_001.fastq.gz"
+echo "Concatenating" ${L001_R1} "and" ${L002_R1}
+/bin/cat ${L001_R1} ${L002_R1} > ${L012_R1}
+echo "Concatenating" ${L001_R2} "and" ${L002_R2}
+/bin/cat ${L001_R2} ${L002_R2} > ${L012_R2}
